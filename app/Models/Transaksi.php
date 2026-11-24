@@ -28,11 +28,17 @@ class Transaksi extends Model
         'nama_pelanggan',
         'no_hp',
         'layanan_id',
+        'is_express',
         'berat',
         'total_harga',
         'status',
         'status_pembayaran',
+        'metode_pembayaran',
         'catatan',
+        'kondisi_baju',
+        'lokasi_rak',
+        'deadline',
+        'items_detail',
         'user_id',
         'tgl_masuk',
         'tgl_selesai',
@@ -46,6 +52,8 @@ class Transaksi extends Model
     protected $attributes = [
         'status' => 'Masuk',
         'status_pembayaran' => 'Belum Lunas',
+        'is_express' => false,
+        'metode_pembayaran' => 'Tunai',
     ];
 
     /**
@@ -56,8 +64,25 @@ class Transaksi extends Model
     protected $casts = [
         'berat' => 'decimal:2',
         'total_harga' => 'decimal:2',
+        'is_express' => 'boolean',
+        'deadline' => 'datetime',
+        'items_detail' => 'array',
         'tgl_masuk' => 'datetime',
         'tgl_selesai' => 'datetime',
+    ];
+
+    /**
+     * The accessors to append to the model's array and JSON form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'nota_display',
+        'sisa_waktu',
+        'status_dot_class',
+        'normalized_status',
+        'harga_rupiah',
+        'berat_formatted',
     ];
 
     /**
@@ -185,13 +210,86 @@ class Transaksi extends Model
     }
 
     /**
+     * Accessor for compact Nota ID (e.g. #LND-042 or short code).
+     */
+    public function getNotaDisplayAttribute(): string
+    {
+        if (empty($this->kode_transaksi)) {
+            return '';
+        }
+        if (preg_match('/-(\d+)$/', (string) $this->kode_transaksi, $matches)) {
+            return '#LND-' . str_pad($matches[1], 3, '0', STR_PAD_LEFT);
+        }
+        return '#' . (string) $this->kode_transaksi;
+    }
+
+    /**
+     * Accessor for remaining time / express deadline indicator.
+     */
+    public function getSisaWaktuAttribute(): ?string
+    {
+        if (empty($this->deadline)) {
+            return null;
+        }
+
+        $now = now();
+        if ($now->greaterThan($this->deadline)) {
+            $diffHours = $this->deadline->diffInHours($now);
+            return $diffHours > 0 ? "Terlambat {$diffHours} jam" : "Lewat deadline";
+        }
+
+        $diffHours = $now->diffInHours($this->deadline);
+        if ($diffHours < 1) {
+            $diffMins = $now->diffInMinutes($this->deadline);
+            return "Sisa {$diffMins} mnt";
+        }
+
+        return "Sisa {$diffHours} jam";
+    }
+
+    /**
+     * Accessor for semantic status dot color.
+     */
+    public function getStatusDotClassAttribute(): string
+    {
+        if (empty($this->status)) {
+            return 'bg-slate-400';
+        }
+        return match ($this->status) {
+            'Antrean', 'Masuk' => 'bg-slate-400',
+            'Dicuci', 'Proses' => 'bg-blue-600',
+            'Setrika' => 'bg-amber-500',
+            'Siap Ambil' => 'bg-emerald-600',
+            'Selesai' => 'bg-slate-600',
+            default => 'bg-slate-400',
+        };
+    }
+
+    /**
+     * Accessor for normalized status label.
+     */
+    public function getNormalizedStatusAttribute(): string
+    {
+        if (empty($this->status)) {
+            return 'Antrean';
+        }
+        return match ($this->status) {
+            'Masuk' => 'Antrean',
+            'Proses' => 'Dicuci',
+            default => (string) $this->status,
+        };
+    }
+
+    /**
      * Accessor for Tailwind badge styling based on status.
      */
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {
-            'Masuk' => 'bg-amber-100 text-amber-800 border-amber-200',
-            'Proses' => 'bg-blue-100 text-blue-800 border-blue-200',
+            'Masuk', 'Antrean' => 'bg-amber-100 text-amber-800 border-amber-200',
+            'Proses', 'Dicuci' => 'bg-blue-100 text-blue-800 border-blue-200',
+            'Setrika' => 'bg-amber-100 text-amber-800 border-amber-200',
+            'Siap Ambil' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
             'Selesai' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
             default => 'bg-gray-100 text-gray-800 border-gray-200',
         };

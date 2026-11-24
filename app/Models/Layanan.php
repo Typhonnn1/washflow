@@ -25,9 +25,23 @@ class Layanan extends Model
      */
     protected $fillable = [
         'nama_layanan',
+        'kategori',
         'harga_per_kg',
+        'satuan',
         'durasi',
+        'is_express',
         'deskripsi',
+    ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'kategori' => 'Kiloan',
+        'satuan' => 'kg',
+        'is_express' => false,
     ];
 
     /**
@@ -37,7 +51,17 @@ class Layanan extends Model
      */
     protected $casts = [
         'harga_per_kg' => 'decimal:2',
+        'is_express' => 'boolean',
     ];
+
+    /**
+     * Accessor for formatted Rupiah price with unit.
+     */
+    public function getHargaLabelAttribute(): string
+    {
+        $satuan = $this->satuan ?: 'kg';
+        return 'Rp ' . number_format((float) ($this->harga_per_kg ?? 0), 0, ',', '.') . ' / ' . $satuan;
+    }
 
     /**
      * Accessor for formatted Rupiah price.

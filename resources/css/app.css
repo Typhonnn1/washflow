@@ -1,3 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* 58mm Thermal Receipt Print Styling */
+@media print {
+    @page {
+        size: 58mm auto;
+        margin: 0;
+    }
+    html, body {
+        width: 58mm !important;
+        min-width: 58mm !important;
+        max-width: 58mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    /* Hide all application shells, navigation, drawers, and no-print elements */
+    aside,
+    main,
+    nav,
+    header,
+    [x-show="drawerOpen"],
+    .no-print,
+    .print\:hidden {
+        display: none !important;
+    }
+    /* Exclusively render 58mm thermal receipt print area */
+    #thermal-receipt-print-area {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 58mm !important;
+        max-width: 58mm !important;
+        box-sizing: border-box !important;
+        margin: 0 auto !important;
+        padding: 3mm 2mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    #thermal-receipt-print-area * {
+        visibility: visible !important;
+        box-sizing: border-box !important;
+    }
+}

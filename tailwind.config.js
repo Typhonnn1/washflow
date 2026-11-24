@@ -12,7 +12,17 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],
+                mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+            colors: {
+                primary: {
+                    DEFAULT: '#1D4ED8',
+                    hover: '#1E40AF',
+                },
+            },
+            boxShadow: {
+                'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
             },
         },
     },
