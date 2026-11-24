@@ -57,13 +57,13 @@
                 </svg>
                 <div class="flex flex-col">
                     <span class="font-extrabold text-base text-slate-900 tracking-tight leading-tight">WashFlow</span>
-                    <span class="text-[10px] text-blue-600 font-semibold tracking-wide uppercase">Laundry OS Demo</span>
+                    <span class="text-[10px] text-blue-600 font-semibold tracking-wide uppercase">Laundry OS Live Demo</span>
                 </div>
             </div>
 
-            <!-- Navigation Links -->
+            <!-- Navigation Links (Desktop: md+) -->
             <nav class="hidden md:flex items-center gap-1">
-                <button type="button" @click="activeView = 'kasir'" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5" :class="activeView === 'kasir' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
+                <button type="button" @click="activeView = 'kasir'; mobileKasirTab = 'katalog'" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5" :class="activeView === 'kasir' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
                     <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Kasir POS / Order Baru
                 </button>
@@ -79,30 +79,53 @@
         </div>
 
         <!-- Right Meta -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
                 <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
                 Admin
             </span>
-            <a href="https://github.com/Typhonnn1/washflow" target="_blank" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+            <a href="https://github.com/Typhonnn1/washflow" target="_blank" class="px-2.5 sm:px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-                GitHub Repo
+                <span class="hidden sm:inline">GitHub Repo</span>
             </a>
         </div>
     </header>
 
     <!-- Main Workspace Container -->
-    <main class="flex-1 overflow-hidden">
+    <main class="flex-1 overflow-hidden pb-14 md:pb-0">
 
-        <!-- VIEW A: KASIR POS / ORDER BARU (SPLIT SCREEN 65 / 35) -->
-        <div x-show="activeView === 'kasir'" class="h-full flex overflow-hidden">
-            <!-- Kolom Kiri: Katalog Layanan (65%) -->
-            <div class="w-full lg:w-[65%] h-full flex flex-col bg-slate-100 overflow-hidden">
+        <!-- VIEW A: KASIR POS / ORDER BARU (SPLIT SCREEN 65 / 35 DI DESKTOP) -->
+        <div x-show="activeView === 'kasir'" class="h-full flex flex-col lg:flex-row overflow-hidden">
+            <!-- Mobile Tab Switcher between Katalog & Nota (lg:hidden) -->
+            <div class="lg:hidden flex bg-white border-b border-slate-200 p-2 gap-2 shrink-0 z-20">
+                <button 
+                    type="button" 
+                    @click="mobileKasirTab = 'katalog'" 
+                    class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1.5" 
+                    :class="mobileKasirTab === 'katalog' ? 'bg-blue-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                >
+                    Katalog Layanan
+                </button>
+                <button 
+                    type="button" 
+                    @click="mobileKasirTab = 'nota'" 
+                    class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1.5" 
+                    :class="mobileKasirTab === 'nota' ? 'bg-blue-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                >
+                    Nota Transaksi (<span class="tabular-nums font-bold" x-text="cart.length"></span>)
+                </button>
+            </div>
+
+            <!-- Kolom Kiri: Katalog Layanan (65% di desktop) -->
+            <div 
+                class="w-full lg:w-[65%] h-full flex flex-col bg-slate-100 overflow-hidden"
+                :class="mobileKasirTab === 'katalog' ? 'flex' : 'hidden lg:flex'"
+            >
                 <!-- Topbar Kiri -->
                 <div class="bg-white border-b border-slate-200 shrink-0 p-3 sm:p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-2.5">
                         <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Katalog Layanan Laundry</h2>
-                        <input type="text" x-model="searchKeyword" placeholder="Cari layanan (Reguler, Express, Bedcover)..." class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-64 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                        <input type="text" x-model="searchKeyword" placeholder="Cari layanan..." class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-full sm:w-64 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
                     </div>
                     <!-- Kategori Tab -->
                     <div class="flex items-center gap-1.5 overflow-x-auto text-xs">
@@ -112,11 +135,11 @@
                     </div>
                 </div>
 
-                <!-- Grid Kartu Layanan (4 Kolom) -->
-                <div class="flex-1 overflow-y-auto p-4">
+                <!-- Grid Kartu Layanan (2 Kolom Mobile, 3 Kolom Tablet, 4 Kolom Desktop) -->
+                <div class="flex-1 overflow-y-auto p-3 sm:p-4">
                     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
                         <template x-for="item in filteredServices" :key="item.id">
-                            <div @click="addToCart(item)" class="bg-white border rounded-lg p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer select-none relative flex flex-col justify-between hover:border-blue-500 hover:bg-blue-50/20 active:scale-[0.99] transition" :class="isInCart(item.id) ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/15' : 'border-slate-200/80'">
+                            <div @click="addToCart(item)" class="bg-white border rounded-lg p-2.5 sm:p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer select-none relative flex flex-col justify-between hover:border-blue-500 hover:bg-blue-50/20 active:scale-[0.99] transition" :class="isInCart(item.id) ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/15' : 'border-slate-200/80'">
                                 <template x-if="isInCart(item.id)">
                                     <div class="absolute -top-1.5 -right-1.5 bg-blue-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow-xs tabular-nums" x-text="getCartItem(item.id).qty + (item.satuan || 'kg')"></div>
                                 </template>
@@ -135,11 +158,34 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- Floating Bottom Bar on Mobile when Cart has items -->
+                <div 
+                    x-show="cart.length > 0 && mobileKasirTab === 'katalog'" 
+                    class="lg:hidden p-3 bg-slate-900 text-white flex items-center justify-between shrink-0 shadow-lg border-t border-slate-800"
+                >
+                    <div>
+                        <span class="text-xs font-medium" x-text="cart.length + ' item dipilih'"></span>
+                        <span class="text-xs font-bold text-emerald-400 ms-1.5 tabular-nums" x-text="'(' + 'Rp ' + cartTotal().toLocaleString('id-ID') + ')'"></span>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="mobileKasirTab = 'nota'"
+                        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1"
+                    >
+                        <span>Buka Nota & Kasir</span>
+                        <span>&rarr;</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Kolom Kanan: Nota Transaksi (35%) -->
-            <div class="w-full lg:w-[35%] h-full flex flex-col bg-white border-l border-slate-200 overflow-hidden">
-                <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between shrink-0">
+            <!-- Kolom Kanan: Nota Transaksi (35% di desktop) -->
+            <div 
+                class="w-full lg:w-[35%] h-full flex flex-col bg-white border-l border-slate-200 overflow-hidden"
+                :class="mobileKasirTab === 'nota' ? 'flex' : 'hidden lg:flex'"
+            >
+                <!-- Header Nota -->
+                <div class="p-3 sm:p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50/50">
                     <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Nota Transaksi</span>
                     <span class="text-xs text-slate-500 font-mono tabular-nums"><span x-text="cart.length"></span> Item</span>
                 </div>
@@ -149,54 +195,57 @@
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
                             <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nama Pelanggan</label>
-                            <input type="text" x-model="customerName" placeholder="Ibu Rahma" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                            <input type="text" x-model="customerName" placeholder="Contoh: Ibu Rahma" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
                         </div>
                         <div>
                             <label class="text-[11px] font-semibold text-slate-700 block mb-1">No. WhatsApp</label>
-                            <input type="text" x-model="customerPhone" placeholder="081234567890" class="w-full font-mono bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 tabular-nums focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                            <input type="text" x-model="customerPhone" placeholder="081234567890" class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 tabular-nums">
                         </div>
                     </div>
                 </div>
 
-                <!-- Cart Items -->
-                <div class="flex-1 overflow-y-auto p-3 space-y-2">
+                <!-- Line Items Cart -->
+                <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2">
                     <template x-if="cart.length === 0">
                         <div class="py-12 text-center text-slate-400 text-xs">
-                            <p class="font-semibold text-slate-700">Nota Masih Kosong</p>
-                            <p class="mt-1 text-[11px]">Pilih layanan di sebelah kiri untuk menambah ke nota.</p>
+                            <p class="font-medium text-slate-600">Nota Masih Kosong</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Pilih layanan di katalog untuk menambahkan ke nota transaksi.</p>
                         </div>
                     </template>
+
                     <template x-for="(item, idx) in cart" :key="item.id">
-                        <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50/50 space-y-1.5">
+                        <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
                             <div class="flex items-center justify-between text-xs">
-                                <div class="min-w-0 flex-1">
-                                    <p class="font-semibold text-slate-900 truncate" x-text="item.nama"></p>
-                                    <p class="text-[10px] text-slate-500 tabular-nums">Rp <span x-text="item.harga.toLocaleString('id-ID')"></span> / <span x-text="item.satuan"></span></p>
+                                <div>
+                                    <h4 class="font-bold text-slate-900" x-text="item.nama"></h4>
+                                    <p class="text-[11px] text-slate-500 tabular-nums">Rp <span x-text="item.harga.toLocaleString('id-ID')"></span>/<span x-text="item.satuan"></span></p>
                                 </div>
-                                <div class="flex items-center gap-1 shrink-0">
-                                    <button type="button" @click="adjustQty(idx, -1)" class="w-5 h-5 rounded border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs">-</button>
-                                    <input type="number" step="0.1" min="0.1" x-model.number="item.qty" class="w-12 text-center font-mono font-bold text-xs bg-white border border-slate-200 rounded py-0.5 tabular-nums">
-                                    <button type="button" @click="adjustQty(idx, 1)" class="w-5 h-5 rounded border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs">+</button>
-                                </div>
-                                <div class="w-16 text-right font-mono font-bold text-xs text-slate-900 tabular-nums">
-                                    Rp <span x-text="((item.qty || 0) * item.harga).toLocaleString('id-ID')"></span>
-                                </div>
-                                <button type="button" @click="removeCart(idx)" class="text-slate-400 hover:text-rose-600 px-1 text-xs font-bold">&times;</button>
+                                <button type="button" @click="removeCart(idx)" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-1.5 py-0.5 rounded hover:bg-rose-50">&times;</button>
                             </div>
-                            <!-- Shortcut Berat Kiloan -->
-                            <template x-if="item.satuan === 'kg'">
-                                <div class="flex items-center gap-1 pt-1 border-t border-slate-200/60 text-[10px]">
-                                    <span class="text-slate-400 font-medium">Shortcut:</span>
-                                    <button type="button" @click="item.qty = 3" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">3 kg</button>
-                                    <button type="button" @click="item.qty = 5" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">5 kg</button>
-                                    <button type="button" @click="item.qty = 7" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">7 kg</button>
+
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-100">
+                                <!-- Qty / Berat Controls -->
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" @click="adjustQty(idx, -1)" class="w-6 h-6 rounded border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center text-xs">-</button>
+                                    <span class="font-mono text-xs font-bold px-1 tabular-nums" x-text="item.qty + ' ' + item.satuan"></span>
+                                    <button type="button" @click="adjustQty(idx, 1)" class="w-6 h-6 rounded border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-center text-xs">+</button>
                                 </div>
-                            </template>
+                                <!-- Shortcut Berat kg -->
+                                <template x-if="item.satuan === 'kg'">
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" @click="item.qty = 3" class="px-1.5 py-0.5 rounded bg-slate-200/80 hover:bg-slate-300 text-[10px] font-semibold">3k</button>
+                                        <button type="button" @click="item.qty = 5" class="px-1.5 py-0.5 rounded bg-slate-200/80 hover:bg-slate-300 text-[10px] font-semibold">5k</button>
+                                        <button type="button" @click="item.qty = 7" class="px-1.5 py-0.5 rounded bg-slate-200/80 hover:bg-slate-300 text-[10px] font-semibold">7k</button>
+                                    </div>
+                                </template>
+                                <!-- Subtotal -->
+                                <span class="font-extrabold text-xs font-mono text-slate-900 tabular-nums">Rp <span x-text="((item.qty || 1) * item.harga).toLocaleString('id-ID')"></span></span>
+                            </div>
                         </div>
                     </template>
                 </div>
 
-                <!-- Footer Checkout -->
+                <!-- Footer Checkout Nota -->
                 <div class="p-3.5 border-t border-slate-200 bg-slate-50/50 space-y-2 shrink-0 text-xs">
                     <!-- Segmented Control Status Bayar -->
                     <div>
@@ -230,20 +279,21 @@
         </div>
 
         <!-- VIEW B: ANTREAN & PIPELINE OPERASIONAL -->
-        <div x-show="activeView === 'antrean'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
+        <div x-show="activeView === 'antrean'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-3 sm:p-6">
+            <div class="flex items-center justify-between mb-3 sm:mb-4">
                 <div>
                     <h1 class="text-base font-bold text-slate-900">Antrean & Pipeline Cucian</h1>
                     <p class="text-xs text-slate-500">Monitor status cucian dari masuk antrean hingga diserahkan ke pelanggan.</p>
                 </div>
-                <button type="button" @click="activeView = 'kasir'" class="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors">
+                <button type="button" @click="activeView = 'kasir'; mobileKasirTab = 'katalog'" class="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors">
                     + Order Baru
                 </button>
             </div>
 
-            <!-- Pipeline Table -->
+            <!-- Pipeline Table & Cards -->
             <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs flex-1 flex flex-col">
-                <div class="overflow-x-auto flex-1">
+                <!-- Desktop Table View (>= md) -->
+                <div class="hidden md:block overflow-x-auto flex-1">
                     <table class="w-full text-left text-xs divide-y divide-slate-200">
                         <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
                             <tr>
@@ -259,64 +309,147 @@
                         </thead>
                         <tbody class="divide-y divide-slate-200 divide-solid">
                             <template x-for="ord in orders" :key="ord.nota">
-                                <tr class="hover:bg-slate-50/80 transition-colors">
-                                    <td class="px-4 py-3 font-mono font-bold text-blue-700 tabular-nums" x-text="ord.nota"></td>
-                                    <td class="px-4 py-3 font-semibold text-slate-900" x-text="ord.nama + ' (' + ord.phone + ')'"></td>
-                                    <td class="px-4 py-3 text-slate-600" x-text="ord.layanan"></td>
-                                    <td class="px-4 py-3 font-mono tabular-nums font-medium" x-text="ord.berat + ' kg'"></td>
-                                    <td class="px-4 py-3 font-mono font-bold text-slate-900 tabular-nums">Rp <span x-text="ord.total.toLocaleString('id-ID')"></span></td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border" :class="ord.bayar === 'Lunas' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-800 border-rose-200'" x-text="ord.bayar"></span>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-4 py-2.5 font-mono font-bold text-blue-700 tabular-nums" x-text="ord.nota"></td>
+                                    <td class="px-4 py-2.5">
+                                        <div class="font-semibold text-slate-900" x-text="ord.nama"></div>
+                                        <div class="text-[11px] text-slate-400 font-mono" x-text="ord.phone"></div>
                                     </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border inline-flex items-center gap-1" :class="ord.status === 'Selesai' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (ord.status === 'Dicuci' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-amber-100 text-amber-800 border-amber-200')">
-                                            <span class="w-1.5 h-1.5 rounded-full" :class="ord.status === 'Selesai' ? 'bg-emerald-600' : (ord.status === 'Dicuci' ? 'bg-blue-600' : 'bg-amber-600')"></span>
+                                    <td class="px-4 py-2.5 text-slate-700" x-text="ord.layanan"></td>
+                                    <td class="px-4 py-2.5 font-mono tabular-nums" x-text="ord.berat + ' kg'"></td>
+                                    <td class="px-4 py-2.5 font-mono font-bold text-slate-900 tabular-nums">Rp <span x-text="ord.total.toLocaleString('id-ID')"></span></td>
+                                    <td class="px-4 py-2.5 text-center">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="ord.bayar === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'" x-text="ord.bayar"></span>
+                                    </td>
+                                    <td class="px-4 py-2.5 text-center">
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold" :class="ord.status === 'Antrean' ? 'bg-amber-100 text-amber-800' : (ord.status === 'Dicuci' ? 'bg-blue-100 text-blue-800' : (ord.status === 'Setrika' ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800'))">
+                                            <span class="w-1.5 h-1.5 rounded-full" :class="ord.status === 'Antrean' ? 'bg-amber-600' : (ord.status === 'Dicuci' ? 'bg-blue-600' : (ord.status === 'Setrika' ? 'bg-purple-600' : 'bg-emerald-600'))"></span>
                                             <span x-text="ord.status"></span>
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-right">
-                                        <button type="button" @click="advanceOrder(ord)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold text-[11px] transition-colors" x-text="ord.status === 'Antrean' ? 'Mulai Cuci →' : (ord.status === 'Dicuci' ? 'Mulai Setrika →' : (ord.status === 'Setrika' ? 'Tandai Siap Ambil ✓' : 'Selesai'))"></button>
+                                    <td class="px-4 py-2.5 text-right">
+                                        <button type="button" @click="advanceOrder(ord)" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors">
+                                            <span x-show="ord.status === 'Antrean'">Mulai Cuci &rarr;</span>
+                                            <span x-show="ord.status === 'Dicuci'">Setrika &rarr;</span>
+                                            <span x-show="ord.status === 'Setrika'">Siap Ambil &rarr;</span>
+                                            <span x-show="ord.status === 'Selesai'">Diserahkan &#10003;</span>
+                                        </button>
                                     </td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Card View (< md) -->
+                <div class="block md:hidden divide-y divide-slate-100 overflow-y-auto flex-1">
+                    <template x-for="ord in orders" :key="'mob-' + ord.nota">
+                        <div class="p-3.5 space-y-2.5 hover:bg-slate-50 transition">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-bold text-xs text-blue-700 tabular-nums" x-text="ord.nota"></span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="ord.bayar === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'" x-text="ord.bayar"></span>
+                            </div>
+                            <div class="flex items-baseline justify-between text-xs">
+                                <div>
+                                    <span class="font-bold text-slate-900" x-text="ord.nama"></span>
+                                    <span class="text-slate-400 font-mono ms-1 text-[11px]" x-text="ord.phone"></span>
+                                </div>
+                                <span class="font-mono font-extrabold text-slate-900 tabular-nums">Rp <span x-text="ord.total.toLocaleString('id-ID')"></span></span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                                <span class="text-slate-600" x-text="ord.layanan + ' (' + ord.berat + ' kg)'"></span>
+                                <button type="button" @click="advanceOrder(ord)" class="px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-[11px]">
+                                    <span x-show="ord.status === 'Antrean'">Mulai Cuci</span>
+                                    <span x-show="ord.status === 'Dicuci'">Setrika</span>
+                                    <span x-show="ord.status === 'Setrika'">Siap Ambil</span>
+                                    <span x-show="ord.status === 'Selesai'">Selesai &#10003;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 
-        <!-- VIEW C: KATALOG LAYANAN -->
-        <div x-show="activeView === 'layanan'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-4 sm:p-6">
-            <div class="mb-4">
-                <h1 class="text-base font-bold text-slate-900">Master Data Layanan</h1>
-                <p class="text-xs text-slate-500">Tarif dan estimasi waktu paket pencucian WashFlow.</p>
+        <!-- VIEW C: KATALOG MASTER LAYANAN -->
+        <div x-show="activeView === 'layanan'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-3 sm:p-6">
+            <div class="mb-3 sm:mb-4">
+                <h1 class="text-base font-bold text-slate-900">Katalog Jenis Layanan Cuci</h1>
+                <p class="text-xs text-slate-500">Daftar paket laundry kiloan, satuan, bedcover, dan durasi pengerjaan resmi WashFlow.</p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs">
-                <table class="w-full text-left text-xs divide-y divide-slate-200">
-                    <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
-                        <tr>
-                            <th class="px-4 py-3">Nama Layanan</th>
-                            <th class="px-4 py-3">Kategori</th>
-                            <th class="px-4 py-3">Tarif</th>
-                            <th class="px-4 py-3">Durasi</th>
-                            <th class="px-4 py-3">Fasilitas / Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        <template x-for="s in services" :key="s.id">
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-3 font-bold text-slate-900" x-text="s.nama"></td>
-                                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700" x-text="s.kategori"></span></td>
-                                <td class="px-4 py-3 font-mono font-bold text-blue-700">Rp <span x-text="s.harga.toLocaleString('id-ID')"></span>/<span x-text="s.satuan"></span></td>
-                                <td class="px-4 py-3 text-slate-600 font-medium" x-text="s.durasi"></td>
-                                <td class="px-4 py-3 text-slate-500" x-text="s.desc"></td>
+
+            <!-- Table & Cards Layanan -->
+            <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs flex-1 flex flex-col">
+                <!-- Desktop Table (>= md) -->
+                <div class="hidden md:block overflow-x-auto flex-1">
+                    <table class="w-full text-left text-xs divide-y divide-slate-200">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3">Nama Layanan</th>
+                                <th class="px-4 py-3">Kategori</th>
+                                <th class="px-4 py-3">Tarif</th>
+                                <th class="px-4 py-3">Durasi</th>
+                                <th class="px-4 py-3">Fasilitas / Keterangan</th>
                             </tr>
-                        </template>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <template x-for="s in services" :key="s.id">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-4 py-3 font-bold text-slate-900" x-text="s.nama"></td>
+                                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700" x-text="s.kategori"></span></td>
+                                    <td class="px-4 py-3 font-mono font-bold text-blue-700">Rp <span x-text="s.harga.toLocaleString('id-ID')"></span>/<span x-text="s.satuan"></span></td>
+                                    <td class="px-4 py-3 text-slate-600 font-medium" x-text="s.durasi"></td>
+                                    <td class="px-4 py-3 text-slate-500" x-text="s.desc"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View (< md) -->
+                <div class="block md:hidden divide-y divide-slate-100 overflow-y-auto flex-1">
+                    <template x-for="s in services" :key="'mob-s-' + s.id">
+                        <div class="p-3.5 space-y-2 hover:bg-slate-50 transition">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <h3 class="font-bold text-xs text-slate-900" x-text="s.nama"></h3>
+                                    <span class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-100 text-slate-700" x-text="s.kategori"></span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-bold text-sm text-blue-700 tabular-nums">Rp <span x-text="s.harga.toLocaleString('id-ID')"></span></span>
+                                    <span class="text-[10px] text-slate-400 block">/<span x-text="s.satuan"></span></span>
+                                </div>
+                            </div>
+                            <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
+                                <span class="font-medium text-slate-700" x-text="'Durasi: ' + s.durasi"></span>
+                                <span class="text-slate-400" x-text="s.desc"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
     </main>
+
+    <!-- Mobile Bottom Navigation Bar (md:hidden) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around h-14 px-2 shadow-lg">
+        <button type="button" @click="activeView = 'kasir'; mobileKasirTab = 'katalog'" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="activeView === 'kasir' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <span>+ Kasir POS</span>
+        </button>
+        <button type="button" @click="activeView = 'antrean'" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="activeView === 'antrean' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            <span>Antrean (<span x-text="orders.length"></span>)</span>
+        </button>
+        <button type="button" @click="activeView = 'layanan'" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="activeView === 'layanan' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span>Layanan</span>
+        </button>
+        <a href="https://github.com/Typhonnn1/washflow" target="_blank" class="flex flex-col items-center justify-center flex-1 py-1 text-xs text-slate-500 hover:text-slate-900">
+            <svg class="w-5 h-5 mb-0.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            <span>GitHub</span>
+        </a>
+    </nav>
 
     <!-- Struk Thermal 58mm Modal -->
     <div x-show="showReceipt" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4" @click.self="showReceipt = false">
@@ -352,6 +485,7 @@
         function washFlowApp() {
             return {
                 activeView: 'kasir',
+                mobileKasirTab: 'katalog',
                 selectedCategory: 'Semua',
                 searchKeyword: '',
                 customerName: '',
