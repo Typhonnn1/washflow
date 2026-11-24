@@ -3,7 +3,7 @@
 
     <!-- ==================== SIDEBAR (RAMPING / COLLAPSIBLE) ==================== -->
     <aside 
-        class="bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 transition-all duration-200 z-30 select-none"
+        class="bg-white border-r border-slate-200 hidden md:flex flex-col justify-between shrink-0 transition-all duration-200 z-30 select-none"
         :class="sidebarCollapsed ? 'w-16' : 'w-56'"
     >
         <!-- Top: Brand & Menu -->
@@ -136,7 +136,29 @@
     </aside>
 
     <!-- ==================== MAIN CONTENT AREA ==================== -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50">
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 pb-14 md:pb-0 relative">
+        <!-- Mobile Top Navigation Header (< md) -->
+        <div class="md:hidden flex items-center justify-between px-4 h-12 bg-white border-b border-slate-200 shrink-0">
+            <div class="flex items-center gap-2">
+                <svg class="w-6 h-6 rounded-md shadow-xs shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#2563EB" />
+                    <path d="M 6 10.5 L 8.8 21.5 L 11.5 13 L 14.2 21.5 L 17 10.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M 19.5 10.5 L 25 10.5 M 19.5 15.5 L 24 15.5 M 19.5 10.5 L 19.5 21.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="25.5" cy="20.5" r="1.25" fill="#38BDF8" />
+                </svg>
+                <span class="font-bold text-sm text-slate-900 tracking-tight">WashFlow POS</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                    {{ Auth::user()->role }}
+                </span>
+                <a href="{{ route('dashboard') }}" class="p-1.5 text-slate-500 hover:text-slate-900 rounded-md hover:bg-slate-100" title="Ke Dashboard Admin">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
 
         <!-- ======================================================== -->
         <!-- VIEW A: TAMPILAN UTAMA — ANTREAN & PIPELINE CUCIAN        -->
@@ -227,9 +249,9 @@
             </div>
 
             <!-- Tabel Operasional Padat (Shopify Admin + Linear standard) -->
-            <div class="flex-1 overflow-auto bg-slate-50 p-4">
+            <div class="flex-1 overflow-auto bg-slate-50 p-3 sm:p-4">
                 <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="hidden md:table w-full text-left border-collapse text-xs">
                         <thead>
                             <tr class="border-b border-slate-200 bg-slate-50/80 text-slate-500 text-[11px] font-semibold uppercase tracking-wider">
                                 <th class="py-2.5 px-3">No. Nota & Waktu</th>
@@ -403,6 +425,56 @@
                             </template>
                         </tbody>
                     </table>
+
+                    <!-- Mobile Antrean Card View (< md) -->
+                    <div class="block md:hidden divide-y divide-slate-100">
+                        <template x-for="order in filteredOrders" :key="'mob-' + order.id">
+                            <div 
+                                @click="openOrderDrawer(order)"
+                                class="p-3.5 hover:bg-slate-50 transition cursor-pointer"
+                                :class="order.is_express ? 'bg-amber-50/20 border-l-4 border-l-amber-500' : 'border-l-4 border-l-transparent'"
+                            >
+                                <div class="flex items-center justify-between gap-2 mb-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono font-bold text-slate-900 text-xs tabular-nums" x-text="order.nota_display || ('#' + order.kode_transaksi)"></span>
+                                        <span class="text-[10px] text-slate-400 tabular-nums" x-text="formatDate(order.tgl_masuk)"></span>
+                                    </div>
+                                    <template x-if="order.status_pembayaran === 'Lunas'">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            Lunas
+                                        </span>
+                                    </template>
+                                    <template x-if="order.status_pembayaran !== 'Lunas'">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                            Belum Lunas
+                                        </span>
+                                    </template>
+                                </div>
+                                <div class="flex items-baseline justify-between mb-1.5">
+                                    <div>
+                                        <span class="font-semibold text-slate-900 text-xs" x-text="order.nama_pelanggan"></span>
+                                        <span class="text-[11px] text-slate-500 ms-1 tabular-nums" x-text="order.no_hp"></span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs font-bold text-slate-900 tabular-nums" x-text="formatRupiah(order.total_harga)"></span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-100">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-medium text-slate-800" x-text="order.layanan ? order.layanan.nama_layanan : 'Laundry'"></span>
+                                        <span class="tabular-nums font-semibold text-slate-500" x-text="'(' + order.berat + ' kg)'"></span>
+                                        <template x-if="order.is_express">
+                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-1 rounded">EXP</span>
+                                        </template>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 font-medium text-[11px]" :class="statusColorClass(order.status)">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(order.status)"></span>
+                                        <span x-text="order.status"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
@@ -410,11 +482,41 @@
         <!-- ======================================================== -->
         <!-- VIEW B: TAMPILAN KASIR / ORDER BARU (SPLIT SCREEN 65/35)  -->
         <!-- ======================================================== -->
-        <div x-show="currentView === 'kasir'" class="h-full flex overflow-hidden">
+        <div x-show="currentView === 'kasir'" class="h-full flex flex-col lg:flex-row overflow-hidden pb-14 md:pb-0">
+            <!-- Mobile Tab Switcher between Katalog & Nota (lg:hidden) -->
+            <div class="lg:hidden flex bg-white border-b border-slate-200 p-2 gap-2 shrink-0 z-20">
+                <button 
+                    type="button" 
+                    @click="mobileKasirTab = 'katalog'"
+                    class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1.5"
+                    :class="mobileKasirTab === 'katalog' ? 'bg-blue-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span>Katalog Layanan</span>
+                </button>
+                <button 
+                    type="button" 
+                    @click="mobileKasirTab = 'nota'"
+                    class="flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg text-center transition-colors flex items-center justify-center gap-1.5"
+                    :class="mobileKasirTab === 'nota' ? 'bg-blue-700 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span>Nota Transaksi</span>
+                    <span 
+                        class="text-[10px] px-1.5 py-0.2 rounded-full tabular-nums font-bold" 
+                        :class="mobileKasirTab === 'nota' ? 'bg-white text-blue-700' : 'bg-slate-200 text-slate-800'"
+                        x-text="cart.length"
+                    ></span>
+                </button>
+            </div>
+
             <!-- ---------------------------------------------------- -->
-            <!-- KOLOM KIRI (65%): KATALOG LAYANAN                    -->
+            <!-- KOLOM KIRI (65% di desktop): KATALOG LAYANAN         -->
             <!-- ---------------------------------------------------- -->
-            <div class="w-[65%] h-full flex flex-col bg-slate-100 overflow-hidden">
+            <div 
+                class="w-full lg:w-[62%] xl:w-[65%] h-full flex flex-col bg-slate-100 overflow-hidden"
+                :class="mobileKasirTab === 'katalog' ? 'flex' : 'hidden lg:flex'"
+            >
                 <!-- Top Bar Area Kiri: Header & Tab Kategori Menyatu Solid -->
                 <div class="bg-white border-b border-slate-200 shrink-0">
                     <!-- Header Kolom Kiri -->
@@ -512,12 +614,34 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- Floating Bottom Bar on Mobile when Cart has items -->
+                <div 
+                    x-show="cart.length > 0 && mobileKasirTab === 'katalog'" 
+                    class="lg:hidden p-3 bg-slate-900 text-white flex items-center justify-between shrink-0 shadow-lg border-t border-slate-800"
+                >
+                    <div>
+                        <span class="text-xs font-medium" x-text="cart.length + ' item dipilih'"></span>
+                        <span class="text-xs font-bold text-emerald-400 ms-1.5 tabular-nums" x-text="'(' + formatRupiah(cartTotal) + ')'"></span>
+                    </div>
+                    <button 
+                        type="button" 
+                        @click="mobileKasirTab = 'nota'"
+                        class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1"
+                    >
+                        <span>Buka Nota & Kasir</span>
+                        <span>&rarr;</span>
+                    </button>
+                </div>
             </div>
 
             <!-- ---------------------------------------------------- -->
-            <!-- KOLOM KANAN (35%, STICKY): PELANGGAN, CART, CTA      -->
+            <!-- KOLOM KANAN (35% di desktop): PELANGGAN, CART, CTA   -->
             <!-- ---------------------------------------------------- -->
-            <div class="w-[35%] h-full flex flex-col bg-white border-l border-slate-200 overflow-hidden">
+            <div 
+                class="w-full lg:w-[38%] xl:w-[35%] h-full flex flex-col bg-white border-l border-slate-200 overflow-hidden"
+                :class="mobileKasirTab === 'nota' ? 'flex' : 'hidden lg:flex'"
+            >
                 <!-- Header Nota -->
                 <div class="p-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-slate-50/50">
                     <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Nota Transaksi</span>
@@ -890,6 +1014,25 @@
             </div>
         </div>
 
+        <!-- Mobile Bottom Navigation Bar (md:hidden) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around h-14 px-2 shadow-lg">
+            <button type="button" @click="switchView('antrean')" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="currentView === 'antrean' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span>Antrean</span>
+            </button>
+            <button type="button" @click="switchView('kasir')" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="currentView === 'kasir' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                <span>+ Kasir POS</span>
+            </button>
+            <button type="button" @click="switchView('pelanggan')" class="flex flex-col items-center justify-center flex-1 py-1 text-xs" :class="currentView === 'pelanggan' ? 'text-blue-700 font-bold' : 'text-slate-500'">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span>Pelanggan</span>
+            </button>
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-1 text-xs text-slate-500 hover:text-slate-900">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span>Admin</span>
+            </a>
+        </nav>
     </main>
 
     <!-- ======================================================== -->
@@ -1276,6 +1419,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('posSystem', () => ({
         // Navigation & Layout State
         currentView: '{{ request()->query("tab") === "kasir" ? "kasir" : "antrean" }}',
+        mobileKasirTab: 'katalog',
         sidebarCollapsed: false,
         pipelineTab: '{{ $pipelineTab ?? "Semua" }}',
         filterExpress: '{{ $filterExpress ?? "all" }}',
@@ -1347,6 +1491,8 @@ document.addEventListener('alpine:init', () => {
             this.currentView = view;
             if (view === 'antrean') {
                 this.filterOrders();
+            } else if (view === 'kasir') {
+                this.mobileKasirTab = 'katalog';
             }
         },
 

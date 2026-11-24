@@ -19,7 +19,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Flash Message -->
             @if (session('success'))
@@ -65,9 +65,10 @@
                 </div>
             </div>
 
-            <!-- Table Card -->
+            <!-- Table Card (Desktop Table + Mobile Cards) -->
             <div class="bg-white overflow-hidden shadow-xs border border-gray-200 rounded-xl">
-                <div class="overflow-x-auto">
+                <!-- Desktop Table View (>= md) -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs font-semibold">
                             <tr>
@@ -169,6 +170,68 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mobile Card View (< md) -->
+                <div class="block md:hidden divide-y divide-gray-100">
+                    @forelse ($layananList as $index => $item)
+                        <div class="p-4 space-y-3 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <div class="font-bold text-base text-gray-900 flex items-center gap-2">
+                                        @if ($item->nama_layanan === 'Superkilat')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Prioritas</span>
+                                        @elseif ($item->nama_layanan === 'Ekspres')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300">Cepat</span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-800 border border-gray-300">Standar</span>
+                                        @endif
+                                        <span>{{ $item->nama_layanan }}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span>Estimasi: {{ $item->durasi }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <div class="text-base font-bold text-blue-700 tabular-nums">{{ $item->harga_rupiah }}</div>
+                                    <div class="text-[11px] text-gray-500">per kilogram</div>
+                                </div>
+                            </div>
+
+                            @if ($item->deskripsi)
+                                <p class="text-xs text-gray-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                    {{ $item->deskripsi }}
+                                </p>
+                            @endif
+
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="text-xs text-gray-500 font-medium">
+                                    {{ $item->transaksis_count }} pesanan tercatat
+                                </span>
+                                @if (auth()->user()->isAdmin())
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('layanan.edit', $item) }}" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100">
+                                            Ubah
+                                        </a>
+                                        <form method="POST" action="{{ route('layanan.destroy', $item) }}" onsubmit="return confirm('Hapus layanan \'{{ $item->nama_layanan }}\'?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-md hover:bg-rose-100">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-6 text-center text-gray-400 text-xs">
+                            Tidak ada data layanan yang ditemukan.
+                        </div>
+                    @endforelse
                 </div>
 
                 @if ($layananList->hasPages())

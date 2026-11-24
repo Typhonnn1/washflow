@@ -12,7 +12,7 @@
             </svg>
             Akun Demo Pengujian (1-Klik Isi Form)
         </p>
-        <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <button type="button" onclick="fillLogin('admin@laundry.com', 'password')" class="w-full text-left p-2.5 bg-white border border-blue-300 hover:bg-blue-100 rounded-lg transition-colors shadow-2xs group">
                 <div class="font-bold text-blue-900 flex items-center justify-between">
                     <span class="flex items-center gap-1.5">

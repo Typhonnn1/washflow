@@ -1,20 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h2 class="font-bold text-2xl text-gray-800 leading-tight">
                     {{ __('Tambah Jenis Layanan Cuci') }}
                 </h2>
                 <p class="text-sm text-gray-500 mt-1">Daftarkan jenis layanan baru, tentukan tarif per kilogram dan durasi estimasi.</p>
             </div>
-            <a href="{{ route('layanan.index') }}" class="inline-flex items-center px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors">
+            <a href="{{ route('layanan.index') }}" class="inline-flex items-center px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors w-fit">
                 ← Kembali ke Daftar
             </a>
         </div>
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white p-6 sm:p-8 rounded-xl shadow-xs border border-gray-200">
                 <form method="POST" action="{{ route('layanan.store') }}" class="space-y-6">
                     @csrf

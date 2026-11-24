@@ -17,7 +17,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Flash Success Message -->
             @if (session('success'))
@@ -88,7 +88,8 @@
 
             <!-- Table Card -->
             <div class="bg-white overflow-hidden shadow-xs border border-gray-200 rounded-xl">
-                <div class="overflow-x-auto">
+                <!-- Desktop Table (hidden on mobile, visible md+) -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs font-semibold">
                             <tr>
@@ -264,6 +265,83 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mobile Card View (block md:hidden) -->
+                <div class="block md:hidden divide-y divide-gray-100">
+                    @forelse ($transaksiList as $item)
+                        <div class="p-4 space-y-3 hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <a href="{{ route('transaksi.show', $item) }}" class="font-mono font-bold text-blue-600 hover:text-blue-800 text-sm">
+                                        {{ $item->kode_transaksi }}
+                                    </a>
+                                    <div class="text-[11px] text-gray-500">
+                                        {{ $item->tgl_masuk ? $item->tgl_masuk->format('d M Y, H:i') : '-' }}
+                                    </div>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border {{ $item->status_pembayaran_badge }}">
+                                    {{ $item->status_pembayaran }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between text-xs">
+                                <div>
+                                    <span class="font-bold text-gray-900">{{ $item->nama_pelanggan }}</span>
+                                    <span class="text-gray-500 ms-1 tabular-nums">({{ $item->no_hp }})</span>
+                                </div>
+                                <div class="font-bold text-blue-700 text-sm tabular-nums">
+                                    {{ $item->harga_rupiah }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-xs bg-gray-50 p-2.5 rounded-lg border border-gray-100">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-medium text-gray-800">{{ $item->layanan->nama_layanan ?? '-' }}</span>
+                                    <span class="text-gray-500 tabular-nums">({{ $item->berat_formatted }})</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border {{ $item->status_badge }}">
+                                    {{ $item->status }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <div class="flex items-center gap-2">
+                                    @if ($item->status === 'Masuk')
+                                        <form method="POST" action="{{ route('transaksi.status', $item) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="Proses">
+                                            <button type="submit" class="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md font-medium">Mulai Proses</button>
+                                        </form>
+                                    @elseif ($item->status === 'Proses')
+                                        <form method="POST" action="{{ route('transaksi.status', $item) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="Selesai">
+                                            <button type="submit" class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-md font-medium">Tandai Selesai</button>
+                                        </form>
+                                    @endif
+
+                                    @if ($item->status_pembayaran === 'Belum Lunas')
+                                        <form method="POST" action="{{ route('transaksi.pembayaran', $item) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status_pembayaran" value="Lunas">
+                                            <button type="submit" class="text-xs px-2.5 py-1 bg-emerald-600 text-white rounded-md font-medium">Bayar Lunas</button>
+                                        </form>
+                                    @endif
+                                </div>
+
+                                <div class="flex items-center gap-1.5">
+                                    <a href="{{ route('transaksi.show', $item) }}" class="p-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-semibold">Nota</a>
+                                    <a href="{{ route('transaksi.edit', $item) }}" class="p-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-xs font-semibold">Edit</a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-6 text-center text-gray-400 text-xs">Belum ada transaksi tercatat.</div>
+                    @endforelse
                 </div>
 
                 @if ($transaksiList->hasPages())
