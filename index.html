@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WashFlow — Sistem Informasi Manajemen Laundry & POS Operasional</title>
+    <!-- Plus Jakarta Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-modal, #receipt-modal * { visibility: visible; }
+            #receipt-modal { position: absolute; left: 0; top: 0; width: 58mm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased h-screen flex flex-col overflow-hidden" x-data="washFlowApp()" x-cloak>
+
+    <!-- Top Global Header -->
+    <header class="bg-white border-b border-slate-200 h-14 shrink-0 px-4 sm:px-6 flex items-center justify-between z-30">
+        <div class="flex items-center gap-6">
+            <!-- Brand -->
+            <div class="flex items-center gap-2.5">
+                <svg class="w-8 h-8 rounded-lg shrink-0 shadow-xs" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="url(#wf-grad)" />
+                    <defs>
+                        <linearGradient id="wf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#2563EB" />
+                            <stop offset="60%" stop-color="#1D4ED8" />
+                            <stop offset="100%" stop-color="#0E7490" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="24" cy="24" r="14.5" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="4 3" />
+                    <path d="M 13 24 C 13 17.9 17.9 13 24 13 C 30.1 13 35 17.9 35 24 C 35 28.5 32.2 32.5 28.3 34 C 24.3 35.5 19.8 33.6 18.5 29.8 C 17.2 26 19.4 21.8 23.2 21 C 26.2 20.2 28.8 22 28.8 24.5 C 28.8 26.5 27 28 25 28 C 23.6 28 22.6 27 22.6 25.8" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" />
+                    <circle cx="24" cy="24" r="2.25" fill="#38BDF8" />
+                    <circle cx="34" cy="14" r="2" fill="#FFFFFF" fill-opacity="0.9" />
+                </svg>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-base text-slate-900 tracking-tight leading-tight">WashFlow</span>
+                    <span class="text-[10px] text-blue-600 font-semibold tracking-wide uppercase">Laundry OS Demo</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-1">
+                <button type="button" @click="activeView = 'kasir'" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5" :class="activeView === 'kasir' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Kasir POS / Order Baru
+                </button>
+                <button type="button" @click="activeView = 'antrean'" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5" :class="activeView === 'antrean' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
+                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    Antrean & Pipeline (<span class="tabular-nums" x-text="orders.length"></span>)
+                </button>
+                <button type="button" @click="activeView = 'layanan'" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5" :class="activeView === 'layanan' ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'">
+                    <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    Katalog Layanan
+                </button>
+            </nav>
+        </div>
+
+        <!-- Right Meta -->
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
+                Admin
+            </span>
+            <a href="https://github.com/Typhonnn1/washflow" target="_blank" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                GitHub Repo
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 overflow-hidden">
+
+        <!-- VIEW A: KASIR POS / ORDER BARU (SPLIT SCREEN 65 / 35) -->
+        <div x-show="activeView === 'kasir'" class="h-full flex overflow-hidden">
+            <!-- Kolom Kiri: Katalog Layanan (65%) -->
+            <div class="w-full lg:w-[65%] h-full flex flex-col bg-slate-100 overflow-hidden">
+                <!-- Topbar Kiri -->
+                <div class="bg-white border-b border-slate-200 shrink-0 p-3 sm:p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Katalog Layanan Laundry</h2>
+                        <input type="text" x-model="searchKeyword" placeholder="Cari layanan (Reguler, Express, Bedcover)..." class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-64 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                    </div>
+                    <!-- Kategori Tab -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto text-xs">
+                        <template x-for="cat in categories" :key="cat">
+                            <button type="button" @click="selectedCategory = cat" class="px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap" :class="selectedCategory === cat ? 'bg-slate-900 text-white font-semibold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" x-text="cat"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Grid Kartu Layanan (4 Kolom) -->
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                        <template x-for="item in filteredServices" :key="item.id">
+                            <div @click="addToCart(item)" class="bg-white border rounded-lg p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer select-none relative flex flex-col justify-between hover:border-blue-500 hover:bg-blue-50/20 active:scale-[0.99] transition" :class="isInCart(item.id) ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/15' : 'border-slate-200/80'">
+                                <template x-if="isInCart(item.id)">
+                                    <div class="absolute -top-1.5 -right-1.5 bg-blue-600 text-white font-bold text-[10px] px-1.5 py-0.5 rounded-full shadow-xs tabular-nums" x-text="getCartItem(item.id).qty + (item.satuan || 'kg')"></div>
+                                </template>
+                                <div>
+                                    <div class="flex items-center justify-between text-[10px] mb-1">
+                                        <span class="px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider" :class="item.kategori === 'Express' ? 'bg-amber-100 text-amber-800' : (item.kategori === 'Kiloan' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700')" x-text="item.kategori"></span>
+                                        <span class="text-slate-500 font-medium tabular-nums" x-text="item.durasi"></span>
+                                    </div>
+                                    <h3 class="font-bold text-xs text-slate-900 leading-snug line-clamp-2 mt-1" x-text="item.nama"></h3>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-slate-100 flex items-baseline justify-between">
+                                    <span class="font-extrabold text-sm text-slate-900 tabular-nums">Rp <span x-text="item.harga.toLocaleString('id-ID')"></span></span>
+                                    <span class="text-[10px] text-slate-400">/<span x-text="item.satuan"></span></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Nota Transaksi (35%) -->
+            <div class="w-full lg:w-[35%] h-full flex flex-col bg-white border-l border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between shrink-0">
+                    <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Nota Transaksi</span>
+                    <span class="text-xs text-slate-500 font-mono tabular-nums"><span x-text="cart.length"></span> Item</span>
+                </div>
+
+                <!-- Input Pelanggan (2 Kolom Sejajar) -->
+                <div class="p-3 border-b border-slate-200 bg-white shrink-0">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">Nama Pelanggan</label>
+                            <input type="text" x-model="customerName" placeholder="Ibu Rahma" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-700 block mb-1">No. WhatsApp</label>
+                            <input type="text" x-model="customerPhone" placeholder="081234567890" class="w-full font-mono bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 tabular-nums focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Items -->
+                <div class="flex-1 overflow-y-auto p-3 space-y-2">
+                    <template x-if="cart.length === 0">
+                        <div class="py-12 text-center text-slate-400 text-xs">
+                            <p class="font-semibold text-slate-700">Nota Masih Kosong</p>
+                            <p class="mt-1 text-[11px]">Pilih layanan di sebelah kiri untuk menambah ke nota.</p>
+                        </div>
+                    </template>
+                    <template x-for="(item, idx) in cart" :key="item.id">
+                        <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50/50 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-slate-900 truncate" x-text="item.nama"></p>
+                                    <p class="text-[10px] text-slate-500 tabular-nums">Rp <span x-text="item.harga.toLocaleString('id-ID')"></span> / <span x-text="item.satuan"></span></p>
+                                </div>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button type="button" @click="adjustQty(idx, -1)" class="w-5 h-5 rounded border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs">-</button>
+                                    <input type="number" step="0.1" min="0.1" x-model.number="item.qty" class="w-12 text-center font-mono font-bold text-xs bg-white border border-slate-200 rounded py-0.5 tabular-nums">
+                                    <button type="button" @click="adjustQty(idx, 1)" class="w-5 h-5 rounded border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-xs">+</button>
+                                </div>
+                                <div class="w-16 text-right font-mono font-bold text-xs text-slate-900 tabular-nums">
+                                    Rp <span x-text="((item.qty || 0) * item.harga).toLocaleString('id-ID')"></span>
+                                </div>
+                                <button type="button" @click="removeCart(idx)" class="text-slate-400 hover:text-rose-600 px-1 text-xs font-bold">&times;</button>
+                            </div>
+                            <!-- Shortcut Berat Kiloan -->
+                            <template x-if="item.satuan === 'kg'">
+                                <div class="flex items-center gap-1 pt-1 border-t border-slate-200/60 text-[10px]">
+                                    <span class="text-slate-400 font-medium">Shortcut:</span>
+                                    <button type="button" @click="item.qty = 3" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">3 kg</button>
+                                    <button type="button" @click="item.qty = 5" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">5 kg</button>
+                                    <button type="button" @click="item.qty = 7" class="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 font-medium">7 kg</button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Footer Checkout -->
+                <div class="p-3.5 border-t border-slate-200 bg-slate-50/50 space-y-2 shrink-0 text-xs">
+                    <!-- Segmented Control Status Bayar -->
+                    <div>
+                        <div class="bg-slate-100 p-1 rounded-lg grid grid-cols-2 gap-1 text-center">
+                            <button type="button" @click="paymentStatus = 'Lunas'" class="py-1 rounded-md transition-all font-medium" :class="paymentStatus === 'Lunas' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600'">Lunas Langsung</button>
+                            <button type="button" @click="paymentStatus = 'Belum Lunas'" class="py-1 rounded-md transition-all font-medium" :class="paymentStatus === 'Belum Lunas' ? 'bg-white text-slate-900 shadow-xs font-bold' : 'text-slate-600'">Bayar Nanti</button>
+                        </div>
+                    </div>
+
+                    <!-- Chip Kondisi Pakaian -->
+                    <div>
+                        <div class="flex flex-wrap gap-1">
+                            <template x-for="c in conditionPresets" :key="c">
+                                <button type="button" @click="toggleCondition(c)" class="px-2 py-0.5 rounded text-[10px] border transition-colors" :class="selectedConditions.includes(c) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'" x-text="c"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="pt-2 border-t border-slate-200 flex items-baseline justify-between">
+                        <span class="font-semibold text-slate-600 uppercase tracking-wider text-[11px]">Total Biaya:</span>
+                        <span class="text-base font-extrabold font-mono text-slate-900 tabular-nums">Rp <span x-text="cartTotal().toLocaleString('id-ID')"></span></span>
+                    </div>
+
+                    <!-- Primary CTA -->
+                    <button type="button" @click="saveOrder()" :disabled="cart.length === 0 || !customerName.trim()" class="w-full py-2.5 rounded-lg bg-blue-700 hover:bg-blue-800 disabled:bg-blue-700/40 disabled:cursor-not-allowed text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+                        <span>Simpan & Cetak Nota</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW B: ANTREAN & PIPELINE OPERASIONAL -->
+        <div x-show="activeView === 'antrean'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-base font-bold text-slate-900">Antrean & Pipeline Cucian</h1>
+                    <p class="text-xs text-slate-500">Monitor status cucian dari masuk antrean hingga diserahkan ke pelanggan.</p>
+                </div>
+                <button type="button" @click="activeView = 'kasir'" class="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors">
+                    + Order Baru
+                </button>
+            </div>
+
+            <!-- Pipeline Table -->
+            <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs flex-1 flex flex-col">
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left text-xs divide-y divide-slate-200">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                            <tr>
+                                <th class="px-4 py-2.5">No. Nota</th>
+                                <th class="px-4 py-2.5">Pelanggan</th>
+                                <th class="px-4 py-2.5">Layanan</th>
+                                <th class="px-4 py-2.5">Berat</th>
+                                <th class="px-4 py-2.5">Tagihan</th>
+                                <th class="px-4 py-2.5 text-center">Status Bayar</th>
+                                <th class="px-4 py-2.5 text-center">Status Cucian</th>
+                                <th class="px-4 py-2.5 text-right">Aksi Pipeline</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 divide-solid">
+                            <template x-for="ord in orders" :key="ord.nota">
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-4 py-3 font-mono font-bold text-blue-700 tabular-nums" x-text="ord.nota"></td>
+                                    <td class="px-4 py-3 font-semibold text-slate-900" x-text="ord.nama + ' (' + ord.phone + ')'"></td>
+                                    <td class="px-4 py-3 text-slate-600" x-text="ord.layanan"></td>
+                                    <td class="px-4 py-3 font-mono tabular-nums font-medium" x-text="ord.berat + ' kg'"></td>
+                                    <td class="px-4 py-3 font-mono font-bold text-slate-900 tabular-nums">Rp <span x-text="ord.total.toLocaleString('id-ID')"></span></td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold border" :class="ord.bayar === 'Lunas' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-rose-100 text-rose-800 border-rose-200'" x-text="ord.bayar"></span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border inline-flex items-center gap-1" :class="ord.status === 'Selesai' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (ord.status === 'Dicuci' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-amber-100 text-amber-800 border-amber-200')">
+                                            <span class="w-1.5 h-1.5 rounded-full" :class="ord.status === 'Selesai' ? 'bg-emerald-600' : (ord.status === 'Dicuci' ? 'bg-blue-600' : 'bg-amber-600')"></span>
+                                            <span x-text="ord.status"></span>
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <button type="button" @click="advanceOrder(ord)" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold text-[11px] transition-colors" x-text="ord.status === 'Antrean' ? 'Mulai Cuci →' : (ord.status === 'Dicuci' ? 'Mulai Setrika →' : (ord.status === 'Setrika' ? 'Tandai Siap Ambil ✓' : 'Selesai'))"></button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW C: KATALOG LAYANAN -->
+        <div x-show="activeView === 'layanan'" class="h-full flex flex-col overflow-hidden bg-slate-50 p-4 sm:p-6">
+            <div class="mb-4">
+                <h1 class="text-base font-bold text-slate-900">Master Data Layanan</h1>
+                <p class="text-xs text-slate-500">Tarif dan estimasi waktu paket pencucian WashFlow.</p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs">
+                <table class="w-full text-left text-xs divide-y divide-slate-200">
+                    <thead class="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider">
+                        <tr>
+                            <th class="px-4 py-3">Nama Layanan</th>
+                            <th class="px-4 py-3">Kategori</th>
+                            <th class="px-4 py-3">Tarif</th>
+                            <th class="px-4 py-3">Durasi</th>
+                            <th class="px-4 py-3">Fasilitas / Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <template x-for="s in services" :key="s.id">
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-4 py-3 font-bold text-slate-900" x-text="s.nama"></td>
+                                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700" x-text="s.kategori"></span></td>
+                                <td class="px-4 py-3 font-mono font-bold text-blue-700">Rp <span x-text="s.harga.toLocaleString('id-ID')"></span>/<span x-text="s.satuan"></span></td>
+                                <td class="px-4 py-3 text-slate-600 font-medium" x-text="s.durasi"></td>
+                                <td class="px-4 py-3 text-slate-500" x-text="s.desc"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Struk Thermal 58mm Modal -->
+    <div x-show="showReceipt" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4" @click.self="showReceipt = false">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 max-w-sm w-full font-mono text-xs shadow-xl space-y-3">
+            <div id="receipt-modal" class="p-3 bg-slate-50 border border-slate-200 rounded text-center space-y-1">
+                <p class="font-extrabold text-sm text-slate-900">WASHFLOW LAUNDRY</p>
+                <p class="text-[10px] text-slate-500">Jl. Raya Kampus No. 123 | WA: 0812-3456-7890</p>
+                <div class="border-b border-dashed border-slate-300 my-2"></div>
+                <div class="text-left text-[11px] space-y-0.5">
+                    <p>Nota: <strong x-text="lastReceipt.nota"></strong></p>
+                    <p>Nama: <span x-text="lastReceipt.nama"></span></p>
+                    <p>Status: <span class="font-bold text-emerald-700" x-text="lastReceipt.bayar"></span></p>
+                </div>
+                <div class="border-b border-dashed border-slate-300 my-2"></div>
+                <div class="text-left text-[11px]">
+                    <div class="flex justify-between">
+                        <span x-text="lastReceipt.layanan + ' (' + lastReceipt.berat + ' kg)'"></span>
+                        <span class="font-bold">Rp <span x-text="lastReceipt.total?.toLocaleString('id-ID')"></span></span>
+                    </div>
+                </div>
+                <div class="border-b border-dashed border-slate-300 my-2"></div>
+                <p class="text-[10px] text-slate-500">Terima kasih atas kepercayaan Anda!</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="window.print()" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-bold text-xs transition-colors">Cetak Struk (58mm)</button>
+                <button type="button" @click="showReceipt = false" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-xs transition-colors">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine State Logic -->
+    <script>
+        function washFlowApp() {
+            return {
+                activeView: 'kasir',
+                selectedCategory: 'Semua',
+                searchKeyword: '',
+                customerName: '',
+                customerPhone: '',
+                paymentStatus: 'Lunas',
+                selectedConditions: [],
+                conditionPresets: ['Noda Membandel', 'Mudah Luntur', 'Kancing Lepas', 'Tanpa Pewangi', 'Pewangi Ekstra'],
+                categories: ['Semua', 'Kiloan', 'Express', 'Satuan', 'Bedcover'],
+                cart: [],
+                showReceipt: false,
+                lastReceipt: {},
+                services: [
+                    { id: 1, nama: 'Cuci Komplit Reguler', kategori: 'Kiloan', harga: 7000, satuan: 'kg', durasi: '3-4 Hari', desc: 'Cuci, kering, pewangi & setrika uap rapi' },
+                    { id: 2, nama: 'Cuci Kering Reguler', kategori: 'Kiloan', harga: 5500, satuan: 'kg', durasi: '2-3 Hari', desc: 'Cuci & kering tanpa setrika' },
+                    { id: 3, nama: 'Setrika Uap Saja', kategori: 'Kiloan', harga: 5000, satuan: 'kg', durasi: '1-2 Hari', desc: 'Setrika uap rapi & packing plastik' },
+                    { id: 4, nama: 'Cuci Express 1 Hari', kategori: 'Express', harga: 12000, satuan: 'kg', durasi: '1 Hari', desc: 'Layanan kilat 24 jam selesai' },
+                    { id: 5, nama: 'Superkilat 5 Jam', kategori: 'Express', harga: 25000, satuan: 'kg', durasi: '5 Jam Selesai', desc: 'Prioritas tertinggi cuci bersih siap pakai' },
+                    { id: 6, nama: 'Bedcover Besar (King)', kategori: 'Bedcover', harga: 35000, satuan: 'pcs', durasi: '2-3 Hari', desc: 'Pencucian tebal bedcover wangi & higienis' },
+                    { id: 7, nama: 'Bedcover Sedang (Single)', kategori: 'Bedcover', harga: 25000, satuan: 'pcs', durasi: '2-3 Hari', desc: 'Bedcover ukuran single cuci higienis' },
+                    { id: 8, nama: 'Jas / Blazer Formal', kategori: 'Satuan', harga: 30000, satuan: 'pcs', durasi: '2 Hari', desc: 'Perlakuan khusus dry clean & gantungan' },
+                    { id: 9, nama: 'Gamis / Gaun Pesta', kategori: 'Satuan', harga: 25000, satuan: 'pcs', durasi: '2 Hari', desc: 'Perawatan bahan sutra & bordir teliti' },
+                    { id: 10, nama: 'Sepatu Sneaker / Casual', kategori: 'Satuan', harga: 30000, satuan: 'pasang', durasi: '2 Hari', desc: 'Deep cleaning sol & upper sepatu' },
+                ],
+                orders: [
+                    { nota: '#LND-001', nama: 'Budi Santoso', phone: '081234567890', layanan: 'Cuci Komplit Reguler', berat: 3.5, total: 24500, bayar: 'Belum Lunas', status: 'Antrean' },
+                    { nota: '#LND-002', nama: 'Siti Nurhaliza', phone: '085678901234', layanan: 'Cuci Express 1 Hari', berat: 2.0, total: 24000, bayar: 'Lunas', status: 'Dicuci' },
+                    { nota: '#LND-003', nama: 'Ahmad Fadillah', phone: '087812345678', layanan: 'Superkilat 5 Jam', berat: 1.5, total: 37500, bayar: 'Lunas', status: 'Selesai' },
+                ],
+                get filteredServices() {
+                    return this.services.filter(s => {
+                        const matchCat = this.selectedCategory === 'Semua' || s.kategori === this.selectedCategory;
+                        const matchSearch = s.nama.toLowerCase().includes(this.searchKeyword.toLowerCase()) || s.kategori.toLowerCase().includes(this.searchKeyword.toLowerCase());
+                        return matchCat && matchSearch;
+                    });
+                },
+                addToCart(service) {
+                    const exist = this.cart.find(c => c.id === service.id);
+                    if (exist) {
+                        exist.qty = Math.round((exist.qty + (service.satuan === 'kg' ? 1 : 1)) * 10) / 10;
+                    } else {
+                        this.cart.push({ ...service, qty: service.satuan === 'kg' ? 3 : 1 });
+                    }
+                },
+                isInCart(serviceId) {
+                    return this.cart.some(c => c.id === serviceId);
+                },
+                getCartItem(serviceId) {
+                    return this.cart.find(c => c.id === serviceId);
+                },
+                adjustQty(idx, delta) {
+                    this.cart[idx].qty = Math.max(0.1, Math.round((this.cart[idx].qty + delta) * 10) / 10);
+                },
+                removeCart(idx) {
+                    this.cart.splice(idx, 1);
+                },
+                cartTotal() {
+                    return this.cart.reduce((sum, item) => sum + ((item.qty || 0) * item.harga), 0);
+                },
+                toggleCondition(c) {
+                    if (this.selectedConditions.includes(c)) {
+                        this.selectedConditions = this.selectedConditions.filter(x => x !== c);
+                    } else {
+                        this.selectedConditions.push(c);
+                    }
+                },
+                saveOrder() {
+                    if (this.cart.length === 0 || !this.customerName.trim()) return;
+                    const primary = this.cart[0];
+                    const nextNum = (this.orders.length + 1).toString().padStart(3, '0');
+                    const newOrd = {
+                        nota: `#LND-${nextNum}`,
+                        nama: this.customerName,
+                        phone: this.customerPhone || '08xxxxxxxx',
+                        layanan: primary.nama + (this.cart.length > 1 ? ` (+${this.cart.length - 1} item)` : ''),
+                        berat: primary.qty,
+                        total: this.cartTotal(),
+                        bayar: this.paymentStatus,
+                        status: 'Antrean'
+                    };
+                    this.orders.unshift(newOrd);
+                    this.lastReceipt = newOrd;
+                    this.cart = [];
+                    this.customerName = '';
+                    this.customerPhone = '';
+                    this.showReceipt = true;
+                },
+                advanceOrder(ord) {
+                    if (ord.status === 'Antrean') ord.status = 'Dicuci';
+                    else if (ord.status === 'Dicuci') ord.status = 'Setrika';
+                    else if (ord.status === 'Setrika') ord.status = 'Selesai';
+                }
+            };
+        }
+    </script>
+</body>
+</html>
