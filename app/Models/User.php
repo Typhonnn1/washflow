@@ -30,7 +30,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return strtolower(trim((string) $this->role)) === 'admin';
     }
 
     /**
@@ -38,7 +38,19 @@ class User extends Authenticatable
      */
     public function isKasir(): bool
     {
-        return $this->role === 'kasir';
+        return strtolower(trim((string) $this->role)) === 'kasir';
+    }
+
+    /**
+     * Get readable label for user role.
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        return match (strtolower(trim((string) $this->role))) {
+            'admin' => 'Administrator',
+            'kasir' => 'Kasir',
+            default => ucfirst((string) $this->role),
+        };
     }
 
     /**

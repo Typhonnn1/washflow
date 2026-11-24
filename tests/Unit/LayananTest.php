@@ -26,6 +26,40 @@ class LayananTest extends TestCase
             'durasi' => '3-4 hari',
         ]);
         $this->assertEquals(7000.00, $layanan->harga_per_kg);
+        $this->assertEquals('Rp 7.000', $layanan->harga_rupiah);
+    }
+
+    public function test_layanan_scope_cari_and_total_pendapatan(): void
+    {
+        $layanan = Layanan::create([
+            'nama_layanan' => 'Superkilat Premium',
+            'harga_per_kg' => 25000,
+            'durasi' => '5 jam selesai',
+            'deskripsi' => 'Layanan khusus pakaian mahal',
+        ]);
+
+        $this->assertEquals(1, Layanan::cari('Superkilat')->count());
+        $this->assertEquals(1, Layanan::cari('mahal')->count());
+        $this->assertEquals(0, Layanan::cari('NonExistent')->count());
+
+        // Test total pendapatan
+        Transaksi::create([
+            'nama_pelanggan' => 'Lina',
+            'no_hp' => '081299',
+            'layanan_id' => $layanan->id,
+            'berat' => 2.0,
+            'status_pembayaran' => 'Lunas',
+        ]);
+
+        Transaksi::create([
+            'nama_pelanggan' => 'Mira',
+            'no_hp' => '081288',
+            'layanan_id' => $layanan->id,
+            'berat' => 1.0,
+            'status_pembayaran' => 'Belum Lunas',
+        ]);
+
+        $this->assertEquals(50000.00, $layanan->totalPendapatan());
     }
 
     public function test_layanan_has_many_transaksis(): void
